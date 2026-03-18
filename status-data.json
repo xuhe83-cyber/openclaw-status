@@ -1,7 +1,7 @@
 {
-  "lastUpdate": "2026-03-18 20:17:54",
-  "timestamp": "2026-03-18T12:17:54Z",
-  "syncTime": "2026-03-18 20:17:54",
+  "lastUpdate": "2026-03-18 20:18:12",
+  "timestamp": "2026-03-18T12:18:12Z",
+  "syncTime": "2026-03-18 20:18:12",
   "health": "Healthy",
   "kpi": {
     "pending": 114,
@@ -53,7 +53,7 @@
     }
   },
   "resources": {
-    "cpu": "6.51%",
+    "cpu": "6.13%",
     "memory": {
       "used": 1,
       "total": 16
