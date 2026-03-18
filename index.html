@@ -12,6 +12,13 @@
     .refresh-time { color: #aaa; font-size: 0.9em; text-align: right; }
     .section { background: #151520; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     h2 { font-size: 1.1em; margin-bottom: 15px; color: #aaa; }
+    .agent-card { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e1e2e; gap: 15px; }
+    .agent-card:last-child { border-bottom: none; }
+    .agent-icon { font-size: 1.4em; width: 30px; text-align: center; }
+    .agent-name { width: 130px; font-weight: 600; }
+    .agent-status { width: 60px; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; text-align: center; font-weight: 600; }
+    .status-running { background: #00ffc822; color: #00ffc8; }
+    .status-idle { background: #ffffff11; color: #666; }
     .stats-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
     .stat-box { background: #1a1a28; border-radius: 8px; padding: 16px; text-align: center; min-height: 64px; display:flex; flex-direction:column; justify-content:center; }
     .stat-label { font-size: 0.85em; color: #666; margin-bottom: 6px; }
@@ -40,10 +47,18 @@
     </div>
   </div>
   <div id="error-box" class="error-box"></div>
+  <div id="agents-section" class="section"></div>
   <div id="vault-section" class="section"></div>
   <div id="resources-section" class="section"></div>
   <div id="timestamp" class="timestamp"></div>
   <script>
+    const AGENTS = [
+      { id: 'mini', name: 'Mini', icon: '🧠' },
+      { id: 'gatekeeper', name: 'Gatekeeper', icon: '🚪' },
+      { id: 'librarian', name: 'Librarian', icon: '📚' },
+      { id: 'bridgebuilder', name: 'Bridgebuilder', icon: '🕸️' },
+      { id: 'auditor', name: 'Auditor', icon: '🔍' }
+    ];
     const KB_KEYS = ['pending', 'inbox', 'vault', 'tagsMOCs', 'bridged'];
     const KB_LABELS = { pending: '待处理', inbox: 'Inbox', vault: 'Vault', tagsMOCs: 'Tags/MOCs', bridged: 'Bridged' };
 
@@ -52,7 +67,7 @@
         const res = await fetch('status-data.json?t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        console.log('Loaded data:', data);
+        console.log('Loaded data:', JSON.stringify(data, null, 2));
         render(data);
         document.getElementById('error-box').style.display = 'none';
       } catch (e) {
@@ -62,18 +77,34 @@
     }
 
     function render(data) {
+      renderAgents(data.agents || {});
       renderVault(data.knowledgeBase || {});
       renderResources(data.system || {});
       renderTimestamp(data);
     }
 
+    function renderAgents(agents) {
+      const el = document.getElementById('agents-section');
+      let html = '<h2>🤖 Agents</h2>';
+      AGENTS.forEach(a => {
+        const info = agents[a.id] || {};
+        const status = info.status || info || 'ready';
+        const isActive = status === 'active' || status === 'running';
+        const cls = isActive ? 'status-running' : 'status-idle';
+        html += '<div class="agent-card">' +
+          '<div class="agent-icon">' + a.icon + '</div>' +
+          '<div class="agent-name">' + a.name + '</div>' +
+          '<div class="agent-status ' + cls + '">' + status + '</div>' +
+          '</div>';
+      });
+      el.innerHTML = html;
+    }
+
     function renderVault(kb) {
-      console.log('renderVault kb:', kb);
       const el = document.getElementById('vault-section');
       let html = '<h2>📦 知识库</h2><div class="stats-grid">';
       KB_KEYS.forEach(key => {
         const val = kb[key];
-        console.log('key:', key, 'val:', val);
         let cls = '';
         if (key === 'pending' && val > 0) cls = 'warn';
         if (key === 'bridged') cls = 'highlight';
