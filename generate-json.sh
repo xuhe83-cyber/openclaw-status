@@ -12,7 +12,7 @@ count_files() {
     ls -1 "$path"/$pattern 2>/dev/null | wc -l | tr -d ' '
 }
 
-# Agent 活跃度
+# Agent 活跃度 - 基于 session.json 最后修改时间
 check_agent_status() {
     local agent=$1
     local session_file="$HOME/.openclaw/agents/$agent/agent/session.json"
@@ -21,15 +21,61 @@ check_agent_status() {
         local now=$(date +%s)
         local diff=$(( (now - mtime) / 60 ))
         if [ "$diff" -lt 5 ]; then
-            echo "🟢"
+            echo "active"
         elif [ "$diff" -lt 30 ]; then
-            echo "🟡"
+            echo "idle"
         else
-            echo "⚪"
+            echo "offline"
         fi
     else
-        echo "⚪"
+        echo "offline"
     fi
+}
+
+# 获取运行中的 agent 列表（从 sessions.json 文件解析）
+get_running_agents() {
+    local agents_json="["
+    local first=true
+    
+    # 从 sessions.json 中提取所有唯一的 agent 类型
+    local unique_agents=$(grep -o "agent:main:[^:]*" "$HOME/.openclaw/agents/main/sessions/sessions.json" 2>/dev/null | cut -d':' -f3 | sort | uniq)
+    
+    # 遍历所有唯一的 agent 类型
+    for agent_type in $unique_agents; do
+        # 跳过空值和不符合规范的类型
+        if [ -n "$agent_type" ] && [ "$agent_type" != "main\"" ] && [ "$agent_type" != "telegram\"" ] && [ "$agent_type" != "webchat\"" ]; then
+            # 获取该 agent 的状态
+            local status=$(check_agent_status "$agent_type")
+            
+            if [ "$first" = true ]; then
+                first=false
+            else
+                agents_json+=","
+            fi
+            agents_json+="{\"name\":\"$agent_type\",\"status\":\"$status\"}"
+        fi
+    done
+    
+    # 检查主要的后台 agent 是否存在对应的目录和进程
+    for agent_type in "gatekeeper" "librarian" "bridgebuilder" "auditor" "interpreter" "cleaner"; do
+        # 检查 agent 目录是否存在
+        if [ -d "$HOME/.openclaw/agents/$agent_type" ]; then
+            # 检查是否在 sessions.json 中已存在
+            if ! echo "$unique_agents" | grep -q "^$agent_type$"; then
+                # Agent 目录存在但会话不存在，可能处于非活动状态
+                local status="idle"
+                if [ "$first" = true ]; then
+                    first=false
+                else
+                    agents_json+=","
+                fi
+                agents_json+="{\"name\":\"$agent_type\",\"status\":\"$status\"}"
+            fi
+        fi
+    done
+    
+    agents_json+="]"
+    echo "$agents_json"
 }
 
 # 数据收集
@@ -45,15 +91,12 @@ cleaner_total=281
 cleaner_pending=$((cleaner_total - cleaner_done))
 
 # 资源使用
-memory_percent=$(top -l 1 2>/dev/null | grep "PhysMem" | awk '{gsub(/%/,""); print $6}' || echo "16")
+memory_percent_raw=$(top -l 1 2>/dev/null | grep "PhysMem" | awk '{print $6}' || echo "16%")
+memory_percent=$(echo "$memory_percent_raw" | sed 's/%//' | sed 's/[a-zA-Z]//g' | awk '{print int($1)}' 2>/dev/null || echo "16")
 disk_percent=$(df -h ~ 2>/dev/null | tail -1 | awk '{gsub(/%/,""); print $5}' || echo "53")
 
-# Agent 状态
-main_status=$(check_agent_status main)
-gatekeeper_status=$(check_agent_status gatekeeper)
-librarian_status=$(check_agent_status librarian)
-bridgebuilder_status=$(check_agent_status bridgebuilder)
-cleaner_status=$(check_agent_status cleaner)
+# 获取运行中的 agents 列表
+agents_json=$(get_running_agents)
 
 # 生成告警
 alerts="[]"
@@ -103,13 +146,7 @@ cat > "$JSON_FILE" << EOF
     "tagsMOCs": $tagsMOCs_count,
     "bridged": $bridged_count
   },
-  "agents": {
-    "main": "$main_status",
-    "gatekeeper": "$gatekeeper_status",
-    "librarian": "$librarian_status",
-    "bridgebuilder": "$bridgebuilder_status",
-    "cleaner": "$cleaner_status"
-  },
+  "agents": $agents_json,
   "resources": {
     "memory": $memory_percent,
     "disk": $disk_percent
@@ -119,3 +156,4 @@ cat > "$JSON_FILE" << EOF
 EOF
 
 echo "✅ JSON 数据已更新：$JSON_FILE"
+echo "   运行中的 agents: $agents_json"
