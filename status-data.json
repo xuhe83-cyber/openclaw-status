@@ -1,10 +1,13 @@
 {
-  "timestamp": "2026-03-18T12:41:00+08:00",
+  "timestamp": "2026-03-18T12:42:07+08:00",
   "agents": {
     "main": {"agent": "Main (Mini)", "icon": "🧠", "status": "running", "task": "监控", "progress": 100},
+    "gatekeeper": {"agent": "Gatekeeper", "icon": "🚪", "status": "idle", "task": "等待任务", "progress": 0},
+    "librarian": {"agent": "Librarian", "icon": "📚", "status": "idle", "task": "等待任务", "progress": 0},
+    "bridgebuilder": {"agent": "Bridgebuilder", "icon": "🕸️", "status": "idle", "task": "等待任务", "progress": 0},
     "cleaner": {"agent": "Cleaner", "icon": "🧹", "status": "running", "task": "萃取", "progress": 59, "done": 167, "total": 281}
   },
-  "vault": {"inbox": 0, "vault": 0, "tagsMOCs": 89, "bridged": 0},
-  "resources": {"memory": 19, "disk": 53},
+  "vault": {"inbox": 167, "vault": 0, "pending": 0, "tagsMOCs": 0, "bridged": 168},
+  "resources": {"memory": 99, "disk": 53},
   "alerts": []
 }
