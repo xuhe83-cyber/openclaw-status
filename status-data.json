@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-18T15:27:37+08:00",
+  "timestamp": "2026-03-18T15:32:41+08:00",
   "agents": [
     {"id": "main", "name": "Main (Mini)", "icon": "🧠", "status": "running", "task": "监控 & 调度", "progress": 100},
     {"id": "gatekeeper", "name": "Gatekeeper", "icon": "🚪", "status": "idle", "task": "等待任务", "progress": 0},
