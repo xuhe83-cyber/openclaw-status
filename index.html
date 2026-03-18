@@ -12,24 +12,12 @@
     .refresh-time { color: #aaa; font-size: 0.9em; text-align: right; }
     .section { background: #151520; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     h2 { font-size: 1.1em; margin-bottom: 15px; color: #aaa; }
-    .agent-card { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e1e2e; gap: 15px; }
-    .agent-card:last-child { border-bottom: none; }
-    .agent-icon { font-size: 1.4em; width: 30px; text-align: center; }
-    .agent-name { width: 130px; font-weight: 600; }
-    .agent-status { width: 60px; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; text-align: center; font-weight: 600; }
-    .status-running { background: #00ffc822; color: #00ffc8; }
-    .status-idle { background: #ffffff11; color: #666; }
-    .agent-task { width: 140px; color: #888; font-size: 0.9em; }
-    .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-    .progress-bar { flex: 1; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffc8, #00a8ff); border-radius: 4px; transition: width 0.5s; }
-    .progress-text { width: 40px; text-align: right; font-size: 0.9em; color: #00ffc8; font-weight: 600; }
-    .progress-extra { width: 70px; text-align: right; font-size: 0.8em; color: #666; }
-    /* 强制五列固定顺序的 Vault 区 */
     .stats-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
     .stat-box { background: #1a1a28; border-radius: 8px; padding: 16px; text-align: center; min-height: 64px; display:flex; flex-direction:column; justify-content:center; }
     .stat-label { font-size: 0.85em; color: #666; margin-bottom: 6px; }
-    .stat-value { font-size: 1.6em; font-weight: 700; color: #fff; word-break:break-word; }
+    .stat-value { font-size: 1.6em; font-weight: 700; color: #fff; }
+    .stat-value.warn { color: #ffaa00; }
+    .stat-value.highlight { color: #00ffc8; }
     .resource-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .resource-label { width: 50px; font-size: 0.9em; color: #aaa; }
     .resource-bar { flex: 1; height: 10px; background: #1e1e2e; border-radius: 5px; overflow: hidden; }
@@ -40,12 +28,7 @@
     .resource-pct { width: 50px; text-align: right; font-size: 0.9em; }
     .timestamp { text-align: center; color: #444; font-size: 0.85em; margin-top: 8px; }
     .error-box { background: #ff4d4d22; border: 1px solid #ff4d4d; border-radius: 8px; padding: 16px; color: #ff4d4d; text-align: center; display: none; margin-bottom: 20px; }
-    /* 小屏幕兼容：改为2行布局 */
-    @media (max-width: 680px) {
-      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .agent-name { width: 110px; }
-      .agent-task { width: 100px; display:none; }
-    }
+    @media (max-width: 680px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
@@ -57,26 +40,19 @@
     </div>
   </div>
   <div id="error-box" class="error-box"></div>
-  <div id="agents-section" class="section"></div>
   <div id="vault-section" class="section"></div>
   <div id="resources-section" class="section"></div>
   <div id="timestamp" class="timestamp"></div>
   <script>
-    const AGENTS = [
-      { id: 'mini', name: 'Mini', icon: '🧠' },
-      { id: 'gatekeeper', name: 'Gatekeeper', icon: '🚪' },
-      { id: 'librarian', name: 'Librarian', icon: '📚' },
-      { id: 'bridgebuilder', name: 'Bridgebuilder', icon: '🕸️' },
-      { id: 'auditor', name: 'Auditor', icon: '🔍' }
-    ];
-    const KB_ORDER = ['pending', 'inbox', 'vault', 'tagsMOCs', 'bridged'];
-    const KB_LABELS = { inbox: 'Inbox', vault: 'Vault', pending: '待处理', tagsMOCs: 'Tags/MOCs', bridged: 'Bridged' };
+    const KB_KEYS = ['pending', 'inbox', 'vault', 'tagsMOCs', 'bridged'];
+    const KB_LABELS = { pending: '待处理', inbox: 'Inbox', vault: 'Vault', tagsMOCs: 'Tags/MOCs', bridged: 'Bridged' };
 
     async function loadData() {
       try {
         const res = await fetch('status-data.json?t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
+        console.log('Loaded data:', data);
         render(data);
         document.getElementById('error-box').style.display = 'none';
       } catch (e) {
@@ -86,42 +62,24 @@
     }
 
     function render(data) {
-      renderAgents(data.agents || {});
       renderVault(data.knowledgeBase || {});
       renderResources(data.system || {});
       renderTimestamp(data);
     }
 
-    function renderAgents(agents) {
-      const el = document.getElementById('agents-section');
-      let html = '<h2>🤖 Agents</h2>';
-      AGENTS.forEach(a => {
-        const info = agents[a.id] || {};
-        const status = info.status || 'idle';
-        const task = info.task || '';
-        const progress = info.progress || 0;
-        const cls = status === 'active' || status === 'running' ? 'status-running' : 'status-idle';
-        html += '<div class="agent-card">' +
-          '<div class="agent-icon">' + a.icon + '</div>' +
-          '<div class="agent-name">' + a.name + '</div>' +
-          '<div class="agent-status ' + cls + '">' + status + '</div>' +
-          '<div class="agent-task">' + (task || '—') + '</div>' +
-          '<div class="progress-wrap">' +
-            '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
-            '<div class="progress-text">' + progress + '%</div>' +
-          '</div></div>';
-      });
-      el.innerHTML = html;
-    }
-
     function renderVault(kb) {
+      console.log('renderVault kb:', kb);
       const el = document.getElementById('vault-section');
       let html = '<h2>📦 知识库</h2><div class="stats-grid">';
-      KB_ORDER.forEach(key => {
-        const val = kb[key] || 0;
+      KB_KEYS.forEach(key => {
+        const val = kb[key];
+        console.log('key:', key, 'val:', val);
+        let cls = '';
+        if (key === 'pending' && val > 0) cls = 'warn';
+        if (key === 'bridged') cls = 'highlight';
         html += '<div class="stat-box">' +
           '<div class="stat-label">' + KB_LABELS[key] + '</div>' +
-          '<div class="stat-value">' + val + '</div>' +
+          '<div class="stat-value ' + cls + '">' + (val !== undefined ? val : 0) + '</div>' +
           '</div>';
       });
       html += '</div>';
@@ -162,7 +120,7 @@
     }
 
     function renderTimestamp(data) {
-      const ts = data.lastUpdate || data.timestamp || data.updated_at || new Date().toISOString();
+      const ts = data.lastUpdate || data.timestamp || new Date().toISOString();
       const d = new Date(ts);
       const str = d.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
       document.getElementById('refresh-label').textContent = '上次刷新: ' + str;
