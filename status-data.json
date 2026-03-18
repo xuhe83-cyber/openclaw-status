@@ -1,6 +1,9 @@
 {
-  "lastUpdate": "2026-03-18T10:31:39+08:00",
-  "system": { "memory": "25%", "disk": "95GB" },
+  "lastUpdate": "2026-03-18T10:32:19+08:00",
+  "system": {
+    "memory": "0%",
+    "disk": "95GB"
+  },
   "knowledgeBase": {
     "inbox": 167,
     "vault": 0,
@@ -8,5 +11,11 @@
     "tagsMOCs": 0,
     "bridged": 0
   },
-  "agents": { "mini": "active", "gatekeeper": "ready", "librarian": "ready", "bridgebuilder": "ready", "auditor": "ready" }
+  "agents": {
+    "mini": "active",
+    "gatekeeper": "ready",
+    "librarian": "ready",
+    "bridgebuilder": "ready",
+    "auditor": "ready"
+  }
 }
