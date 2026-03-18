@@ -5,188 +5,157 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw 状态表盘</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 30px; color: #00d9ff; }
-        h2 { margin: 20px 0 15px; color: #00d9ff; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        
-        .section { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        
-        .agent-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: #0f3460; border-radius: 8px; margin-bottom: 10px; }
-        .agent-card .icon { font-size: 28px; }
-        .agent-card .name { font-weight: bold; min-width: 130px; }
-        .agent-card .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-        .agent-card .status.running { background: #00c853; color: #000; }
-        .agent-card .status.idle { background: #555; color: #ccc; }
-        .agent-card .task { color: #888; flex: 1; }
-        .agent-card .progress-info { text-align: right; min-width: 80px; }
-        .progress-bar { height: 6px; background: #333; border-radius: 3px; margin-top: 5px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00d9ff, #00ff88); border-radius: 3px; transition: width 0.3s; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
-        .stat-item { background: #0f3460; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 28px; font-weight: bold; color: #00d9ff; }
-        .stat-label { color: #888; font-size: 12px; margin-top: 5px; }
-        
-        .resource-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 10px; }
-        .resource-label { min-width: 60px; }
-        .resource-track { flex: 1; height: 20px; background: #333; border-radius: 10px; overflow: hidden; }
-        .resource-fill { height: 100%; transition: width 0.3s; }
-        .resource-fill.low { background: #00c853; }
-        .resource-fill.medium { background: #ffc107; }
-        .resource-fill.high { background: #ff5722; }
-        .resource-percent { min-width: 50px; text-align: right; }
-        
-        .timestamp { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
-        .error { background: #ff4444; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "SF Pro Display", sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        h1 { text-align: center; font-size: 2em; margin-bottom: 30px; color: #00ffc8; }
+        .section { background: #151520; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        h2 { font-size: 1.1em; margin-bottom: 15px; color: #aaa; }
+        .agent-card {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1e1e2e;
+            gap: 15px;
+        }
+        .agent-card:last-child { border-bottom: none; }
+        .agent-icon { font-size: 1.4em; width: 30px; text-align: center; }
+        .agent-name { width: 130px; font-weight: 600; }
+        .agent-status {
+            width: 60px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            font-weight: 600;
+        }
+        .status-running { background: #00ffc822; color: #00ffc8; }
+        .status-idle { background: #ffffff11; color: #666; }
+        .agent-task { width: 100px; color: #888; font-size: 0.9em; }
+        .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .progress-bar { flex: 1; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffc8, #00a8ff); border-radius: 4px; transition: width 0.5s; }
+        .progress-text { width: 40px; text-align: right; font-size: 0.9em; color: #00ffc8; font-weight: 600; }
+        .progress-extra { width: 70px; text-align: right; font-size: 0.8em; color: #666; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
+        .stat-box { background: #1a1a28; border-radius: 8px; padding: 16px; text-align: center; }
+        .stat-label { font-size: 0.85em; color: #666; margin-bottom: 4px; }
+        .stat-value { font-size: 1.6em; font-weight: 700; color: #fff; }
+        .resource-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .resource-label { width: 50px; font-size: 0.9em; color: #aaa; }
+        .resource-bar { flex: 1; height: 10px; background: #1e1e2e; border-radius: 5px; overflow: hidden; }
+        .resource-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+        .resource-fill.ok { background: #00ffc8; }
+        .resource-fill.warn { background: #ffaa00; }
+        .resource-fill.crit { background: #ff4d4d; }
+        .resource-pct { width: 50px; text-align: right; font-size: 0.9em; }
+        .timestamp { text-align: center; color: #444; font-size: 0.85em; margin-top: 16px; }
+        .error-box {
+            background: #ff4d4d22;
+            border: 1px solid #ff4d4d;
+            border-radius: 8px;
+            padding: 16px;
+            color: #ff4d4d;
+            text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🤖 OpenClaw 状态表盘</h1>
-        
-        <div id="error-container"></div>
-        
-        <div class="section">
-            <h2>🤖 Agent 状态</h2>
-            <div id="agents-container">
-                <p style="color:#888;text-align:center;padding:20px;">加载中...</p>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2>📁 知识库统计</h2>
-            <div id="vault-container" class="stats-grid"></div>
-        </div>
-        
-        <div class="section">
-            <h2>💻 系统资源</h2>
-            <div id="resources-container"></div>
-        </div>
-        
-        <div class="timestamp" id="timestamp"></div>
-    </div>
+    <h1>🤖 OpenClaw 状态表盘</h1>
+    <div id="error-box" class="error-box"></div>
+    <div id="agents-section" class="section"></div>
+    <div id="vault-section" class="section"></div>
+    <div id="resources-section" class="section"></div>
+    <div id="timestamp" class="timestamp"></div>
 
-    <script>
-        const DATA_URL = 'status-data.json';
-        
-        async function loadData() {
-            try {
-                const response = await fetch(DATA_URL + '?t=' + Date.now());
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const data = await response.json();
-                render(data);
-                document.getElementById('error-container').innerHTML = '';
-            } catch (error) {
-                document.getElementById('error-container').innerHTML = 
-                    '<div class="error">❌ 加载失败: ' + error.message + '</div>';
-                console.error('加载失败:', error);
-            }
-        }
-        
-        function render(data) {
-            renderAgents(data.agents);
-            renderVault(data.vault);
-            renderResources(data.resources);
-            document.getElementById('timestamp').textContent = 
-                '最后更新: ' + new Date(data.timestamp).toLocaleString('zh-CN');
-        }
-        
-        function renderAgents(agents) {
-            const container = document.getElementById('agents-container');
-            if (!agents || !agents.length) {
-                container.innerHTML = '<p style="color:#888;text-align:center;">暂无数据</p>';
-                return;
-            }
-            
-            let html = '';
-            agents.forEach(agent => {
-                const statusClass = agent.status === 'running' ? 'running' : 'idle';
-                const statusText = agent.status === 'running' ? '● 运行中' : '○ 空闲';
-                
-                let progressInfo = agent.progress + '%';
-                if (agent.done !== undefined && agent.total !== undefined) {
-                    progressInfo = agent.done + '/' + agent.total + ' (' + agent.progress + '%)';
-                }
-                
-                html += `
-                    <div class="agent-card">
-                        <span class="icon">${agent.icon}</span>
-                        <span class="name">${agent.name}</span>
-                        <span class="status ${statusClass}">${statusText}</span>
-                        <span class="task">${agent.task}</span>
-                        <div class="progress-info">
-                            <div>${progressInfo}</div>
-                            <div class="progress-bar"><div class="progress-fill" style="width:${agent.progress}%"></div></div>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-        
-        function renderVault(vault) {
-            const container = document.getElementById('vault-container');
-            if (!vault) {
-                container.innerHTML = '<p style="color:#888;">暂无数据</p>';
-                return;
-            }
-            
-            const items = [
-                { label: 'Inbox', value: vault.inbox },
-                { label: 'Vault', value: vault.vault },
-                { label: 'Pending', value: vault.pending },
-                { label: 'TagsMOCs', value: vault.tagsMOCs },
-                { label: 'Bridged', value: vault.bridged }
-            ];
-            
-            let html = '';
-            items.forEach(item => {
-                html += `
-                    <div class="stat-item">
-                        <div class="stat-value">${item.value}</div>
-                        <div class="stat-label">${item.label}</div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-        
-        function renderResources(resources) {
-            const container = document.getElementById('resources-container');
-            if (!resources) {
-                container.innerHTML = '<p style="color:#888;">暂无数据</p>';
-                return;
-            }
-            
-            const getResourceClass = (percent) => {
-                if (percent < 50) return 'low';
-                if (percent < 80) return 'medium';
-                return 'high';
-            };
-            
-            let html = '';
-            html += createResourceBar('内存', resources.memory, getResourceClass(resources.memory));
-            html += createResourceBar('磁盘', resources.disk, getResourceClass(resources.disk));
-            container.innerHTML = html;
-        }
-        
-        function createResourceBar(label, percent, className) {
-            return `
-                <div class="resource-bar">
-                    <span class="resource-label">${label}</span>
-                    <div class="resource-track">
-                        <div class="resource-fill ${className}" style="width:${percent}%"></div>
-                    </div>
-                    <span class="resource-percent">${percent}%</span>
-                </div>
-            `;
-        }
-        
-        // 初始化
-        loadData();
-        setInterval(loadData, 60000);
-    </script>
+<script>
+const JSON_URL = 'status-data.json';
+
+async function loadData() {
+    try {
+        const resp = await fetch(JSON_URL + '?t=' + Date.now());
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        document.getElementById('error-box').style.display = 'none';
+        renderAgents(data.agents || []);
+        renderVault(data.vault || {});
+        renderResources(data.resources || {});
+        renderTimestamp(data.timestamp);
+    } catch (err) {
+        const box = document.getElementById('error-box');
+        box.textContent = '⚠️ 数据加载失败: ' + err.message;
+        box.style.display = 'block';
+        console.error('loadData error:', err);
+    }
+}
+
+function renderAgents(agents) {
+    const el = document.getElementById('agents-section');
+    let html = '<h2>🤖 Agent 状态</h2>';
+    agents.forEach(a => {
+        const extra = (a.done != null && a.total != null)
+            ? '<span class="progress-extra">(' + a.done + '/' + a.total + ')</span>'
+            : '<span class="progress-extra"></span>';
+        html += '<div class="agent-card">' +
+            '<span class="agent-icon">' + (a.icon || '🔹') + '</span>' +
+            '<span class="agent-name">' + a.name + '</span>' +
+            '<span class="agent-status status-' + a.status + '">' + (a.status === 'running' ? '运行中' : '空闲') + '</span>' +
+            '<span class="agent-task">' + a.task + '</span>' +
+            '<div class="progress-wrap">' +
+            '<div class="progress-bar"><div class="progress-fill" style="width:' + a.progress + '%"></div></div>' +
+            '<span class="progress-text">' + a.progress + '%</span>' + extra +
+            '</div></div>';
+    });
+    el.innerHTML = html;
+}
+
+function renderVault(v) {
+    const el = document.getElementById('vault-section');
+    const items = [
+        { label: 'Inbox', value: v.inbox ?? '-' },
+        { label: 'Vault', value: v.vault ?? '-' },
+        { label: 'Pending', value: v.pending ?? '-' },
+        { label: 'Tags/MOCs', value: v.tagsMOCs ?? '-' },
+        { label: 'Bridged', value: v.bridged ?? '-' }
+    ];
+    let html = '<h2>📁 知识库统计</h2><div class="stats-grid">';
+    items.forEach(i => {
+        html += '<div class="stat-box"><div class="stat-label">' + i.label + '</div><div class="stat-value">' + i.value + '</div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+function renderResources(r) {
+    const el = document.getElementById('resources-section');
+    let html = '<h2>💻 系统资源</h2>';
+    [{ label: '内存', pct: r.memory }, { label: '磁盘', pct: r.disk }].forEach(item => {
+        const p = item.pct ?? 0;
+        const cls = p > 90 ? 'crit' : p > 70 ? 'warn' : 'ok';
+        html += '<div class="resource-item">' +
+            '<span class="resource-label">' + item.label + '</span>' +
+            '<div class="resource-bar"><div class="resource-fill ' + cls + '" style="width:' + p + '%"></div></div>' +
+            '<span class="resource-pct">' + p + '%</span></div>';
+    });
+    el.innerHTML = html;
+}
+
+function renderTimestamp(ts) {
+    const el = document.getElementById('timestamp');
+    if (ts) {
+        const d = new Date(ts);
+        el.textContent = '数据更新于: ' + d.toLocaleString('zh-CN');
+    }
+}
+
+loadData();
+setInterval(loadData, 60000);
+</script>
 </body>
 </html>
