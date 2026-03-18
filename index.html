@@ -1,161 +1,176 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClaw 状态表盘</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, "SF Pro Display", sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
-            padding: 20px;
-        }
-        h1 { text-align: center; font-size: 2em; margin-bottom: 30px; color: #00ffc8; }
-        .section { background: #151520; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        h2 { font-size: 1.1em; margin-bottom: 15px; color: #aaa; }
-        .agent-card {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #1e1e2e;
-            gap: 15px;
-        }
-        .agent-card:last-child { border-bottom: none; }
-        .agent-icon { font-size: 1.4em; width: 30px; text-align: center; }
-        .agent-name { width: 130px; font-weight: 600; }
-        .agent-status {
-            width: 60px;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            text-align: center;
-            font-weight: 600;
-        }
-        .status-running { background: #00ffc822; color: #00ffc8; }
-        .status-idle { background: #ffffff11; color: #666; }
-        .agent-task { width: 100px; color: #888; font-size: 0.9em; }
-        .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-        .progress-bar { flex: 1; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffc8, #00a8ff); border-radius: 4px; transition: width 0.5s; }
-        .progress-text { width: 40px; text-align: right; font-size: 0.9em; color: #00ffc8; font-weight: 600; }
-        .progress-extra { width: 70px; text-align: right; font-size: 0.8em; color: #666; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
-        .stat-box { background: #1a1a28; border-radius: 8px; padding: 16px; text-align: center; }
-        .stat-label { font-size: 0.85em; color: #666; margin-bottom: 4px; }
-        .stat-value { font-size: 1.6em; font-weight: 700; color: #fff; }
-        .resource-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .resource-label { width: 50px; font-size: 0.9em; color: #aaa; }
-        .resource-bar { flex: 1; height: 10px; background: #1e1e2e; border-radius: 5px; overflow: hidden; }
-        .resource-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
-        .resource-fill.ok { background: #00ffc8; }
-        .resource-fill.warn { background: #ffaa00; }
-        .resource-fill.crit { background: #ff4d4d; }
-        .resource-pct { width: 50px; text-align: right; font-size: 0.9em; }
-        .timestamp { text-align: center; color: #444; font-size: 0.85em; margin-top: 16px; }
-        .error-box {
-            background: #ff4d4d22;
-            border: 1px solid #ff4d4d;
-            border-radius: 8px;
-            padding: 16px;
-            color: #ff4d4d;
-            text-align: center;
-            display: none;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw 状态表盘</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, "SF Pro Display", sans-serif; background: #0a0a0f; color: #e0e0e0; padding: 20px; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    h1 { font-size: 1.6em; color: #00ffc8; }
+    .refresh-time { color: #aaa; font-size: 0.9em; text-align: right; }
+    .section { background: #151520; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    h2 { font-size: 1.1em; margin-bottom: 15px; color: #aaa; }
+    .agent-card { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e1e2e; gap: 15px; }
+    .agent-card:last-child { border-bottom: none; }
+    .agent-icon { font-size: 1.4em; width: 30px; text-align: center; }
+    .agent-name { width: 130px; font-weight: 600; }
+    .agent-status { width: 60px; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; text-align: center; font-weight: 600; }
+    .status-running { background: #00ffc822; color: #00ffc8; }
+    .status-idle { background: #ffffff11; color: #666; }
+    .agent-task { width: 140px; color: #888; font-size: 0.9em; }
+    .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+    .progress-bar { flex: 1; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffc8, #00a8ff); border-radius: 4px; transition: width 0.5s; }
+    .progress-text { width: 40px; text-align: right; font-size: 0.9em; color: #00ffc8; font-weight: 600; }
+    .progress-extra { width: 70px; text-align: right; font-size: 0.8em; color: #666; }
+    /* 强制五列固定顺序的 Vault 区 */
+    .stats-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+    .stat-box { background: #1a1a28; border-radius: 8px; padding: 16px; text-align: center; min-height: 64px; display:flex; flex-direction:column; justify-content:center; }
+    .stat-label { font-size: 0.85em; color: #666; margin-bottom: 6px; }
+    .stat-value { font-size: 1.6em; font-weight: 700; color: #fff; word-break:break-word; }
+    .resource-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .resource-label { width: 50px; font-size: 0.9em; color: #aaa; }
+    .resource-bar { flex: 1; height: 10px; background: #1e1e2e; border-radius: 5px; overflow: hidden; }
+    .resource-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+    .resource-fill.ok { background: #00ffc8; }
+    .resource-fill.warn { background: #ffaa00; }
+    .resource-fill.crit { background: #ff4d4d; }
+    .resource-pct { width: 50px; text-align: right; font-size: 0.9em; }
+    .timestamp { text-align: center; color: #444; font-size: 0.85em; margin-top: 8px; }
+    .error-box { background: #ff4d4d22; border: 1px solid #ff4d4d; border-radius: 8px; padding: 16px; color: #ff4d4d; text-align: center; display: none; margin-bottom: 20px; }
+    /* 小屏幕兼容：改为2行布局 */
+    @media (max-width: 680px) {
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .agent-name { width: 110px; }
+      .agent-task { width: 100px; display:none; }
+    }
+  </style>
 </head>
 <body>
+  <div class="header">
     <h1>🤖 OpenClaw 状态表盘</h1>
-    <div id="error-box" class="error-box"></div>
-    <div id="agents-section" class="section"></div>
-    <div id="vault-section" class="section"></div>
-    <div id="resources-section" class="section"></div>
-    <div id="timestamp" class="timestamp"></div>
-
-<script>
-const JSON_URL = 'status-data.json';
-
-async function loadData() {
-    try {
-        const resp = await fetch(JSON_URL + '?t=' + Date.now());
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        document.getElementById('error-box').style.display = 'none';
-        renderAgents(data.agents || []);
-        renderVault(data.vault || {});
-        renderResources(data.resources || {});
-        renderTimestamp(data.timestamp);
-    } catch (err) {
-        const box = document.getElementById('error-box');
-        box.textContent = '⚠️ 数据加载失败: ' + err.message;
-        box.style.display = 'block';
-        console.error('loadData error:', err);
-    }
-}
-
-function renderAgents(agents) {
-    const el = document.getElementById('agents-section');
-    let html = '<h2>🤖 Agent 状态</h2>';
-    agents.forEach(a => {
-        const extra = (a.done != null && a.total != null)
-            ? '<span class="progress-extra">(' + a.done + '/' + a.total + ')</span>'
-            : '<span class="progress-extra"></span>';
-        html += '<div class="agent-card">' +
-            '<span class="agent-icon">' + (a.icon || '🔹') + '</span>' +
-            '<span class="agent-name">' + a.name + '</span>' +
-            '<span class="agent-status status-' + a.status + '">' + (a.status === 'running' ? '运行中' : '空闲') + '</span>' +
-            '<span class="agent-task">' + a.task + '</span>' +
-            '<div class="progress-wrap">' +
-            '<div class="progress-bar"><div class="progress-fill" style="width:' + a.progress + '%"></div></div>' +
-            '<span class="progress-text">' + a.progress + '%</span>' + extra +
-            '</div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderVault(v) {
-    const el = document.getElementById('vault-section');
-    const items = [
-        { label: 'Inbox', value: v.inbox ?? '-' },
-        { label: 'Vault', value: v.vault ?? '-' },
-        { label: '待处理', value: v.pending ?? '-' },
-        { label: 'Tags/MOCs', value: v.tagsMOCs ?? '-' },
-        { label: 'Bridged', value: v.bridged ?? '-' }
+    <div class="refresh-time">
+      <div id="refresh-label">上次刷新: —</div>
+      <div style="font-size:0.8em;color:#666;">自动更新间隔: 60s</div>
+    </div>
+  </div>
+  <div id="error-box" class="error-box"></div>
+  <div id="agents-section" class="section"></div>
+  <div id="vault-section" class="section"></div>
+  <div id="resources-section" class="section"></div>
+  <div id="timestamp" class="timestamp"></div>
+  <script>
+    const AGENTS = [
+      { id: 'mini', name: 'Mini', icon: '🧠' },
+      { id: 'gatekeeper', name: 'Gatekeeper', icon: '🚪' },
+      { id: 'librarian', name: 'Librarian', icon: '📚' },
+      { id: 'bridgebuilder', name: 'Bridgebuilder', icon: '🕸️' },
+      { id: 'auditor', name: 'Auditor', icon: '🔍' }
     ];
-    let html = '<h2>📁 知识库统计</h2><div class="stats-grid">';
-    items.forEach(i => {
-        html += '<div class="stat-box"><div class="stat-label">' + i.label + '</div><div class="stat-value">' + i.value + '</div></div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
-}
+    const KB_ORDER = ['inbox', 'vault', 'pending', 'tagsMOCs', 'bridged'];
+    const KB_LABELS = { inbox: 'Inbox', vault: 'Vault', pending: '待处理', tagsMOCs: 'Tags/MOCs', bridged: 'Bridged' };
 
-function renderResources(r) {
-    const el = document.getElementById('resources-section');
-    let html = '<h2>💻 系统资源</h2>';
-    [{ label: '内存', pct: r.memory }, { label: '磁盘', pct: r.disk }].forEach(item => {
-        const p = item.pct ?? 0;
-        const cls = p > 90 ? 'crit' : p > 70 ? 'warn' : 'ok';
-        html += '<div class="resource-item">' +
-            '<span class="resource-label">' + item.label + '</span>' +
-            '<div class="resource-bar"><div class="resource-fill ' + cls + '" style="width:' + p + '%"></div></div>' +
-            '<span class="resource-pct">' + p + '%</span></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderTimestamp(ts) {
-    const el = document.getElementById('timestamp');
-    if (ts) {
-        const d = new Date(ts);
-        el.textContent = '数据更新于: ' + d.toLocaleString('zh-CN');
+    async function loadData() {
+      try {
+        const res = await fetch('status-data.json?t=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        render(data);
+        document.getElementById('error-box').style.display = 'none';
+      } catch (e) {
+        document.getElementById('error-box').textContent = '⚠️ 加载失败: ' + e.message;
+        document.getElementById('error-box').style.display = 'block';
+      }
     }
-}
 
-loadData();
-setInterval(loadData, 60000);
-</script>
+    function render(data) {
+      renderAgents(data.agents || {});
+      renderVault(data.knowledgeBase || {});
+      renderResources(data.system || {});
+      renderTimestamp(data);
+    }
+
+    function renderAgents(agents) {
+      const el = document.getElementById('agents-section');
+      let html = '<h2>🤖 Agents</h2>';
+      AGENTS.forEach(a => {
+        const info = agents[a.id] || {};
+        const status = info.status || 'idle';
+        const task = info.task || '';
+        const progress = info.progress || 0;
+        const cls = status === 'active' || status === 'running' ? 'status-running' : 'status-idle';
+        html += '<div class="agent-card">' +
+          '<div class="agent-icon">' + a.icon + '</div>' +
+          '<div class="agent-name">' + a.name + '</div>' +
+          '<div class="agent-status ' + cls + '">' + status + '</div>' +
+          '<div class="agent-task">' + (task || '—') + '</div>' +
+          '<div class="progress-wrap">' +
+            '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+            '<div class="progress-text">' + progress + '%</div>' +
+          '</div></div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function renderVault(kb) {
+      const el = document.getElementById('vault-section');
+      let html = '<h2>📦 知识库</h2><div class="stats-grid">';
+      KB_ORDER.forEach(key => {
+        const val = kb[key] || 0;
+        html += '<div class="stat-box">' +
+          '<div class="stat-label">' + KB_LABELS[key] + '</div>' +
+          '<div class="stat-value">' + val + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    function renderResources(sys) {
+      const el = document.getElementById('resources-section');
+      const mem = parsePct(sys.memory);
+      const disk = parseGB(sys.disk);
+      let html = '<h2>💻 系统资源</h2>';
+      html += renderResourceRow('内存', mem, 80, 95);
+      html += renderResourceRow('磁盘', disk, 80, 95);
+      el.innerHTML = html;
+    }
+
+    function renderResourceRow(label, pct, warnTh, critTh) {
+      let cls = 'ok';
+      if (pct >= critTh) cls = 'crit';
+      else if (pct >= warnTh) cls = 'warn';
+      return '<div class="resource-item">' +
+        '<div class="resource-label">' + label + '</div>' +
+        '<div class="resource-bar"><div class="resource-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="resource-pct">' + pct.toFixed(0) + '%</div>' +
+        '</div>';
+    }
+
+    function parsePct(s) {
+      if (typeof s === 'number') return s;
+      const m = String(s).match(/(\d+)/);
+      return m ? parseInt(m[1]) : 0;
+    }
+
+    function parseGB(s) {
+      if (typeof s === 'number') return s;
+      const m = String(s).match(/(\d+)/);
+      return m ? parseInt(m[1]) : 0;
+    }
+
+    function renderTimestamp(data) {
+      const ts = data.lastUpdate || data.timestamp || data.updated_at || new Date().toISOString();
+      const d = new Date(ts);
+      const str = d.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+      document.getElementById('refresh-label').textContent = '上次刷新: ' + str;
+      document.getElementById('timestamp').textContent = '数据更新时间: ' + str + ' (Asia/Shanghai)';
+    }
+
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
 </body>
 </html>
