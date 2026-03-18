@@ -1,20 +1,64 @@
 {
- "timestamp": "2026-03-18T20:12:42+08:00",
- "agents": [
-  {"name": "Main (Mini)", "status": "running", "progress": 100},
-  {"name": "Cleaner", "status": "idle", "progress": 0, "done":      167, "total": 281},
-  {"name": "Gatekeeper", "status": "idle", "progress": 0},
-  {"name": "Librarian", "status": "idle", "progress": 0},
-  {"name": "Bridgebuilder", "status": "idle", "progress": 0}
-],
- "vault": {
-   "todo":      114,
-   "inbox":      167,
-   "vault":        0,
-   "pending": 0,
-   "tagsMOCs":        0,
-   "bridged":      196
- },
- "resources": {},
- "alerts": []
+  "lastUpdate": "2026-03-18 20:17:54",
+  "timestamp": "2026-03-18T12:17:54Z",
+  "syncTime": "2026-03-18 20:17:54",
+  "health": "Healthy",
+  "kpi": {
+    "pending": 114,
+    "inbox": 167,
+    "vault": 0,
+    "pendingVault": 0,
+    "tagsMOCs": 0,
+    "bridged": 196
+  },
+  "agents": {
+    "main": {
+      "name": "Main (Mini)",
+      "status": "recent",
+      "lastActive": "5m",
+      "throughput": "32 items/h",
+      "queue": 114
+    },
+    "gatekeeper": {
+      "name": "GateKeeper",
+      "status": "idle",
+      "lastActive": "2d",
+      "throughput": "0 items/h",
+      "queue": 167
+    },
+    "librarian": {
+      "name": "Librarian",
+      "status": "idle",
+      "lastActive": "1d",
+      "throughput": "0 items/h",
+      "queue": 0
+    },
+    "bridgebuilder": {
+      "name": "BridgeBuilder",
+      "status": "idle",
+      "lastActive": "1d",
+      "throughput": "0 links/h",
+      "queue": 196
+    },
+    "cleaner": {
+      "name": "cLearner",
+      "status": "idle",
+      "lastActive": "1d",
+      "progress": {
+        "done": 167,
+        "total": 281,
+        "percent": 59
+      },
+      "throughput": "0 items/min"
+    }
+  },
+  "resources": {
+    "cpu": "6.51%",
+    "memory": {
+      "used": 1,
+      "total": 16
+    },
+    "disk": "95Gi free"
+  },
+  "alerts": []
 }
