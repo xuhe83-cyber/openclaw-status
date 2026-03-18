@@ -67,7 +67,7 @@
         const res = await fetch('status-data.json?t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        console.log('Loaded data:', JSON.stringify(data, null, 2));
+        console.log('DATA:', data);
         render(data);
         document.getElementById('error-box').style.display = 'none';
       } catch (e) {
@@ -87,8 +87,10 @@
       const el = document.getElementById('agents-section');
       let html = '<h2>🤖 Agents</h2>';
       AGENTS.forEach(a => {
-        const info = agents[a.id] || {};
-        const status = info.status || info || 'ready';
+        const info = agents[a.id];
+        let status = 'ready';
+        if (typeof info === 'string') status = info;
+        else if (info && typeof info.status === 'string') status = info.status;
         const isActive = status === 'active' || status === 'running';
         const cls = isActive ? 'status-running' : 'status-idle';
         html += '<div class="agent-card">' +
@@ -104,13 +106,13 @@
       const el = document.getElementById('vault-section');
       let html = '<h2>📦 知识库</h2><div class="stats-grid">';
       KB_KEYS.forEach(key => {
-        const val = kb[key];
+        const val = kb[key] || 0;
         let cls = '';
         if (key === 'pending' && val > 0) cls = 'warn';
         if (key === 'bridged') cls = 'highlight';
         html += '<div class="stat-box">' +
           '<div class="stat-label">' + KB_LABELS[key] + '</div>' +
-          '<div class="stat-value ' + cls + '">' + (val !== undefined ? val : 0) + '</div>' +
+          '<div class="stat-value ' + cls + '">' + val + '</div>' +
           '</div>';
       });
       html += '</div>';
@@ -155,7 +157,7 @@
       const d = new Date(ts);
       const str = d.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
       document.getElementById('refresh-label').textContent = '上次刷新: ' + str;
-      document.getElementById('timestamp').textContent = '数据更新时间: ' + str + ' (Asia/Shanghai)';
+      document.getElementById('timestamp').textContent = '数据更新时间: ' + str;
     }
 
     loadData();
