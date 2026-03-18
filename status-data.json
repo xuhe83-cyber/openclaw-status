@@ -1,18 +1,20 @@
 {
-  "lastUpdate": "2026-03-18T18:48:00+08:00",
+  "lastUpdate": "2026-03-18T18:55:12+08:00",
+  "timestamp": "2026-03-18T18:55:12+08:00",
   "system": {
     "memory": "25%",
-    "disk": "95GB"
+    "disk": "95Gi"
   },
   "knowledgeBase": {
     "inbox": 167,
     "vault": 0,
     "pending": 0,
     "tagsMOCs": 0,
-    "bridged": 0
+    "bridged": 196
   },
   "agents": {
     "mini": "active",
+    "cleaner": "ready",
     "gatekeeper": "ready",
     "librarian": "ready",
     "bridgebuilder": "ready",
