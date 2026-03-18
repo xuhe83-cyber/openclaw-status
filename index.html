@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Team Data Panel - Design Spec</title>
+    <title>Mini-Team Data Panel</title>
     <style>
         * {
             margin: 0;
@@ -77,11 +77,14 @@
             font-size: 13px;
         }
 
-        .led-green {
+        .led-indicator {
             width: 8px;
             height: 8px;
-            background: #00D27A;
             border-radius: 50%;
+        }
+
+        .led-healthy {
+            background: #00D27A;
             box-shadow: 0 0 8px #00D27A;
         }
 
@@ -188,24 +191,24 @@
             margin-bottom: 10px;
         }
 
-        .led {
+        .status-led {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
         }
 
-        .led-red {
+        .led-busy {
             background: #FF5D73;
             box-shadow: 0 0 10px #FF5D73;
         }
 
-        .led-yellow {
+        .led-recent {
             background: #FFB020;
             box-shadow: 0 0 10px #FFB020;
         }
 
-        .led-green {
+        .led-idle {
             background: #00D27A;
             box-shadow: 0 0 10px #00D27A;
         }
@@ -256,6 +259,7 @@
             height: 100%;
             background: linear-gradient(90deg, #00F5C4, #00b894);
             border-radius: 4px;
+            transition: width 0.3s;
         }
 
         /* Bottom Section */
@@ -342,6 +346,12 @@
             background: linear-gradient(90deg, #121A2A, #1a2744);
             border-radius: 2px;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #5a6a7a;
+        }
     </style>
 </head>
 <body>
@@ -354,128 +364,38 @@
             </div>
             <div class="header-right">
                 <div class="health-chip">
-                    <div class="led-green"></div>
-                    <span>Healthy</span>
+                    <div class="led-indicator led-healthy" id="healthLed"></div>
+                    <span id="healthStatus">Healthy</span>
                 </div>
-                <span class="sync-time">Last sync: 2026-03-18 19:32:24</span>
-                <button class="header-btn">Refresh</button>
-                <button class="header-btn">History</button>
+                <span class="sync-time" id="syncTime">Loading...</span>
+                <button class="header-btn" onclick="refreshData()">Refresh</button>
+                <button class="header-btn" onclick="showHistory()">History</button>
             </div>
         </header>
 
         <!-- KPI Row -->
-        <div class="kpi-row">
-            <div class="kpi-card">
-                <div class="kpi-label">Pending</div>
-                <div class="kpi-value">114</div>
-                <div class="kpi-source">source: Mini/Desktop</div>
-                <button class="kpi-sample-btn">Sample</button>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Inbox</div>
-                <div class="kpi-value">167</div>
-                <div class="kpi-source">source: Inbox</div>
-                <button class="kpi-sample-btn">Sample</button>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Vault</div>
-                <div class="kpi-value">0</div>
-                <div class="kpi-source">—</div>
-                <button class="kpi-sample-btn">Sample</button>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">MOCs/Tags</div>
-                <div class="kpi-value">0</div>
-                <div class="kpi-source">—</div>
-                <button class="kpi-sample-btn">Sample</button>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Bridged</div>
-                <div class="kpi-value">196</div>
-                <div class="kpi-source">—</div>
-                <button class="kpi-sample-btn">Sample</button>
-            </div>
+        <div class="kpi-row" id="kpiRow">
+            <div class="loading">Loading data...</div>
         </div>
 
         <!-- Agents Section -->
-        <div class="agents-section">
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="led led-red"></div>
-                    <span class="agent-name">Main (Mini)</span>
-                    <span class="agent-status status-busy">Busy</span>
-                </div>
-                <div class="agent-meta">
-                    throughput: 32 items/h<br>
-                    queue: 114<br>
-                    last active: now
-                </div>
-            </div>
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="led led-yellow"></div>
-                    <span class="agent-name">GateKeeper</span>
-                    <span class="agent-status status-recent">Recent</span>
-                </div>
-                <div class="agent-meta">
-                    throughput: 0 items/h<br>
-                    queue: 0<br>
-                    last active: 2h 15m
-                </div>
-            </div>
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="led led-green"></div>
-                    <span class="agent-name">Librarian</span>
-                    <span class="agent-status status-idle">Idle</span>
-                </div>
-                <div class="agent-meta">
-                    throughput: 0 items/h<br>
-                    queue: 0<br>
-                    last active: 18h 03m
-                </div>
-            </div>
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="led led-red"></div>
-                    <span class="agent-name">BridgeBuilder</span>
-                    <span class="agent-status status-busy">Busy</span>
-                </div>
-                <div class="agent-meta">
-                    throughput: 18 links/h<br>
-                    queue: 196<br>
-                    last active: now
-                </div>
-            </div>
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="led led-yellow"></div>
-                    <span class="agent-name">cLearner</span>
-                    <span class="agent-status status-recent">Recent</span>
-                </div>
-                <div class="agent-meta">
-                    progress: 187 / 309 (54%)<br>
-                    throughput: 9 items/min<br>
-                    last active: 4h 12m
-                </div>
-                <div class="agent-progress">
-                    <div class="progress-bar" style="width: 54%"></div>
-                </div>
-            </div>
+        <div class="agents-section" id="agentsSection">
+            <div class="loading">Loading agents...</div>
         </div>
 
         <!-- Bottom Section -->
         <div class="bottom-section">
             <div class="alerts-card">
                 <div class="card-title">⚠️ Alerts</div>
-                <div class="alert-item">[Warning] Vault count is 0 — possible ingestion failure. <a href="#">[Details]</a></div>
+                <div id="alertsContent">
+                    <div class="alert-item">[Warning] Vault count is 0 — possible ingestion failure. <a href="#">[Details]</a></div>
+                </div>
             </div>
             <div class="logs-card">
                 <div class="card-title">📋 Recent Logs</div>
-                <div class="log-item"><span class="log-time">19:32:24</span> collect: status updated</div>
-                <div class="log-item"><span class="log-time">19:31:58</span> cleaner: processed 4 docs</div>
-                <div class="log-item"><span class="log-time">19:31:22</span> gatekeeper: evaluated 10 items</div>
-                <div class="log-item"><span class="log-time">19:30:45</span> librarian: tagged 3 notes</div>
+                <div id="logsContent">
+                    <div class="log-item"><span class="log-time">--:--:--</span> Waiting for data...</div>
+                </div>
             </div>
         </div>
 
@@ -484,17 +404,17 @@
             <span class="system-title">System Resources</span>
             <div class="system-metric">
                 <span class="metric-label">CPU</span>
-                <span class="metric-value">18%</span>
+                <span class="metric-value" id="cpuValue">--%</span>
                 <div class="mini-sparkline"></div>
             </div>
             <div class="system-metric">
                 <span class="metric-label">Memory</span>
-                <span class="metric-value">7.2/16GB</span>
+                <span class="metric-value" id="memValue">--/16GB</span>
                 <div class="mini-sparkline"></div>
             </div>
             <div class="system-metric">
                 <span class="metric-label">Disk</span>
-                <span class="metric-value">412GB free</span>
+                <span class="metric-value" id="diskValue">---GB free</span>
                 <div class="mini-sparkline"></div>
             </div>
             <div class="system-metric">
@@ -504,5 +424,144 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // 状态映射
+        const STATUS_MAP = {
+            'busy': { led: 'led-busy', class: 'status-busy', text: 'Busy' },
+            'recent': { led: 'led-recent', class: 'status-recent', text: 'Recent' },
+            'idle': { led: 'led-idle', class: 'status-idle', text: 'Idle' }
+        };
+
+        // 加载状态数据
+        async function loadData() {
+            try {
+                const response = await fetch('status-data.json?t=' + Date.now());
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                document.getElementById('kpiRow').innerHTML = '<div class="loading">Failed to load data. Retrying...</div>';
+                setTimeout(loadData, 5000);
+            }
+        }
+
+        // 渲染仪表盘
+        function renderDashboard(data) {
+            // 同步时间
+            document.getElementById('syncTime').textContent = 'Last sync: ' + (data.syncTime || data.lastUpdate || 'N/A');
+
+            // 健康状态
+            const health = data.health || 'Healthy';
+            document.getElementById('healthStatus').textContent = health;
+
+            // KPI 数据
+            const kpi = data.kpi || {};
+            document.getElementById('kpiRow').innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">Pending</div>
+                    <div class="kpi-value">${kpi.pending || 0}</div>
+                    <div class="kpi-source">source: Mini/Desktop</div>
+                    <button class="kpi-sample-btn">Sample</button>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Inbox</div>
+                    <div class="kpi-value">${kpi.inbox || 0}</div>
+                    <div class="kpi-source">source: Inbox</div>
+                    <button class="kpi-sample-btn">Sample</button>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Vault</div>
+                    <div class="kpi-value">${kpi.vault || 0}</div>
+                    <div class="kpi-source">—</div>
+                    <button class="kpi-sample-btn">Sample</button>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">MOCs/Tags</div>
+                    <div class="kpi-value">${kpi.tagsMOCs || 0}</div>
+                    <div class="kpi-source">—</div>
+                    <button class="kpi-sample-btn">Sample</button>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Bridged</div>
+                    <div class="kpi-value">${kpi.bridged || 0}</div>
+                    <div class="kpi-source">—</div>
+                    <button class="kpi-sample-btn">Sample</button>
+                </div>
+            `;
+
+            // Agent 数据
+            const agents = data.agents || {};
+            document.getElementById('agentsSection').innerHTML = renderAgentCard('main', agents.main, 'Main (Mini)') +
+                renderAgentCard('gatekeeper', agents.gatekeeper, 'GateKeeper') +
+                renderAgentCard('librarian', agents.librarian, 'Librarian') +
+                renderAgentCard('bridgebuilder', agents.bridgebuilder, 'BridgeBuilder') +
+                renderAgentCard('cleaner', agents.cleaner, 'cLearner', true);
+
+            // 系统资源
+            const res = data.resources || {};
+            document.getElementById('cpuValue').textContent = res.cpu || '--%';
+            document.getElementById('memValue').textContent = res.memory ? `${res.memory.used}/${res.memory.total}GB` : '--/16GB';
+            document.getElementById('diskValue').textContent = res.disk || '---GB free';
+
+            // Alerts
+            const alerts = data.alerts || [];
+            if (alerts.length > 0) {
+                document.getElementById('alertsContent').innerHTML = alerts.map(a => 
+                    `<div class="alert-item">[${a.level}] ${a.message} <a href="#">[Details]</a></div>`
+                ).join('');
+            }
+
+            // Logs (模拟)
+            document.getElementById('logsContent').innerHTML = `
+                <div class="log-item"><span class="log-time">${data.syncTime ? data.syncTime.split(' ')[1] : '--:--:--'}</span> collect: status updated</div>
+                <div class="log-item"><span class="log-time">19:31:58</span> cleaner: processed 4 docs</div>
+                <div class="log-item"><span class="log-time">19:31:22</span> gatekeeper: evaluated 10 items</div>
+                <div class="log-item"><span class="log-time">19:30:45</span> librarian: tagged 3 notes</div>
+            `;
+        }
+
+        // 渲染 Agent 卡片
+        function renderAgentCard(id, agent, displayName, showProgress = false) {
+            if (!agent) return '';
+            
+            const status = STATUS_MAP[agent.status] || STATUS_MAP.idle;
+            let meta = `throughput: ${agent.throughput || '0 items/h'}<br>queue: ${agent.queue || 0}<br>last active: ${agent.lastActive || 'unknown'}`;
+            
+            let progressHtml = '';
+            if (showProgress && agent.progress) {
+                meta = `progress: ${agent.progress.done} / ${agent.progress.total} (${agent.progress.percent}%)<br>throughput: ${agent.throughput || '0 items/min'}<br>last active: ${agent.lastActive || 'unknown'}`;
+                progressHtml = `<div class="agent-progress"><div class="progress-bar" style="width: ${agent.progress.percent}%"></div></div>`;
+            }
+
+            return `
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="status-led ${status.led}"></div>
+                        <span class="agent-name">${displayName}</span>
+                        <span class="agent-status ${status.class}">${status.text}</span>
+                    </div>
+                    <div class="agent-meta">${meta}</div>
+                    ${progressHtml}
+                </div>
+            `;
+        }
+
+        // 刷新数据
+        function refreshData() {
+            loadData();
+        }
+
+        // 显示历史
+        function showHistory() {
+            alert('History feature coming soon!');
+        }
+
+        // 初始加载
+        loadData();
+
+        // 自动刷新（每 30 秒）
+        setInterval(loadData, 30000);
+    </script>
 </body>
 </html>
