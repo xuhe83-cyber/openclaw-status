@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-18T16:13:50+08:00",
+  "timestamp": "2026-03-18T16:18:52+08:00",
   "agents": [
     {"id": "main", "name": "Main (Mini)", "icon": "🧠", "status": "running", "task": "监控 & 调度", "progress": 100},
     {"id": "gatekeeper", "name": "Gatekeeper", "icon": "🚪", "status": "idle", "task": "等待任务", "progress": 0},
@@ -8,6 +8,6 @@
     {"id": "cleaner", "name": "Cleaner", "icon": "🧹", "status": "running", "task": "萃取文件中", "progress": 59, "done": 167, "total": 281}
   ],
   "vault": {"inbox": 167, "vault": 0, "pending": 0, "tagsMOCs": 0, "bridged": 168},
-  "resources": {"memory": 99, "disk": 53},
+  "resources": {"memory": 95, "disk": 53},
   "alerts": []
 }
