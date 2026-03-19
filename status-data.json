@@ -1,15 +1,15 @@
 {
-  "lastUpdate": "2026-03-18T20:38:41+08:00",
+  "lastUpdate": "2026-03-19T10:43:27+08:00",
   "system": {
     "memory": "25%",
     "disk": "95GB"
   },
   "knowledgeBase": {
-    "inbox": 0,
-    "vault": 57,
-    "pending": 109,
-    "tagsMOCs": 0,
-    "bridged": 196
+    "inbox": 74,
+    "vault": 0,
+    "pending": 0,
+    "tagsMOCs": 3,
+    "bridged": 363
   },
   "agents": {
     "mini": "active",
