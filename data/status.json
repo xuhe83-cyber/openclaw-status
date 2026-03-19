@@ -1,0 +1,68 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-03-19T12:56:00+08:00",
+  "agents": {
+    "orchestrator": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null
+    },
+    "cleaner": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null,
+      "queue_length": 0
+    },
+    "extractor": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null,
+      "api_latency_ms": 0,
+      "tokens_used": 0
+    },
+    "gatekeeper": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null,
+      "decisions_today": {
+        "accept": 0,
+        "reject": 0,
+        "degraded": 0,
+        "confirm_required": 0
+      }
+    },
+    "librarian": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null
+    },
+    "bridgebuilder": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null
+    },
+    "auditor": {
+      "status": "idle",
+      "last_heartbeat": null,
+      "consecutive_errors": 0,
+      "current_task": null,
+      "last_audit": null
+    }
+  },
+  "system": {
+    "inbox_count": 0,
+    "vault_count": 0,
+    "pending_count": 0,
+    "trash_count": 0,
+    "bridged_count": 363,
+    "tagsmocs_count": 3,
+    "resource_alert": false,
+    "last_updated": "2026-03-19T16:07:03+08:00"
+  }
+}}
